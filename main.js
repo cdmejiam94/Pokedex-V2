@@ -2,6 +2,7 @@ const baseUrl = "https://pokeapi.co/api/v2/pokemon/"
 
 const container = document.getElementById("container");
 const pagination = document.getElementById("pagination");
+const search = document.getElementById("search")
 
 let next = ""
 let prev = ""
@@ -67,17 +68,74 @@ const createPagination = () => {
     </ul>
     `
     pagination.innerHTML=innertHTML
-    container.appendChild(pagination)
+}
+
+const createSearchBar = () => {
+    const innerHtml = `
+        <div class='row'>
+            <div class='col'>
+                <input 
+                    class='form-control'
+                    type='text' 
+                    placeholder='Buscar Pokemon...'
+                    id="name"
+                />
+            </div>
+            <div class='col'>
+                <button 
+                    type='button' 
+                    class='btn btn-success mr-5'
+                    style={{marginRight: "15px"}} 
+                    onClick={findPokemon()}>
+                        Buscar
+                </button>
+                <button 
+                    type='button' 
+                    class='btn btn-danger pl-5' 
+                    onClick={clearName()}>
+                        Borrar
+                </button>
+            </div>
+        </div>
+    `
+    search.innerHTML = innerHtml
 }
 
 const onPrevious = () => {
-    fetchPokeList(prev)
+    if(prev){
+        deletePreviousList()
+        fetchPokeList(prev)
+    }
 }
 
 const onNext = () => {
-    fetchPokeList(next)
+    if(next){
+        deletePreviousList()
+        fetchPokeList(next)
+    }
+}
+
+const deletePreviousList = () => {
+    while(container.firstElementChild){
+        container.removeChild(container.firstChild)
+    }
+}
+
+const findPokemon = async () => {
+    deletePreviousList()
+    return await fetch(baseUrl + document.getElementById("name").value)
+    .then((result) => result.json())
+    .then((data) => drawPokemon(data))
+}
+
+const clearName = () => {
+    deletePreviousList()
+    document.getElementById("name").value = ""
+    fetchPokeList(baseUrl)
 }
 
 createPagination()
+
+createSearchBar()
 
 fetchPokeList(baseUrl)
